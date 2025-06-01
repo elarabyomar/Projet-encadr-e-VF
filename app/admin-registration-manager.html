@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Registration Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .login-section, .admin-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; }
+        .hidden { display: none; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin - Registration Management</h1>
+        
+        <!-- Login Section -->
+        <div class="login-section" id="loginSection">
+            <h2>Admin Login</h2>
+            <form id="loginForm">
+                <input type="email" id="adminEmail" placeholder="Admin Email" value="oelaraby@insea.ac.ma" required><br><br>
+                <input type="password" id="adminPassword" placeholder="Admin Password" value="Omar@123" required><br><br>
+                <button type="submit">Login as Admin</button>
+            </form>
+            <div id="loginResult"></div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-section hidden" id="adminSection">
+            <h2>Pending Registrations</h2>
+            <button onclick="loadPendingRegistrations()">Refresh Pending Registrations</button>
+            <div id="pendingRegistrations"></div>
+            
+            <h2>All Registrations</h2>
+            <button onclick="loadAllRegistrations()">Load All Registrations</button>
+            <div id="allRegistrations"></div>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = '';
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginData = {
+                email: document.getElementById('adminEmail').value,
+                password: document.getElementById('adminPassword').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:8081/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+                const loginResult = document.getElementById('loginResult');
+                
+                if (response.ok && result.token) {
+                    adminToken = result.token;
+                    loginResult.innerHTML = '<div class="success">✅ Admin logged in successfully!</div>';
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('adminSection').classList.remove('hidden');
+                    loadPendingRegistrations();
+                } else {
+                    loginResult.innerHTML = '<div class="error">❌ Login failed: ' + (result.message || 'Invalid credentials') + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = '<div class="error">❌ Network error: ' + error.message + '</div>';
+            }
+        });
+
+        // Load pending registrations
+        async function loadPendingRegistrations() {
+            try {
+                const response = await fetch('http://localhost:8081/api/inscriptions/en-attente', {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                });
+
+                const registrations = await response.json();
+                const container = document.getElementById('pendingRegistrations');
+                
+                if (response.ok) {
+                    if (registrations.length === 0) {
+                        container.innerHTML = '<p>No pending registrations found.</p>';
+                    } else {
+                        let html = '<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>';
+                        registrations.forEach(reg => {
+                            html += `<tr>
+                                <td>${reg.id}</td>
+                                <td>${reg.nom} ${reg.prenom}</td>
+                                <td>${reg.email}</td>
+                                <td>${reg.role}</td>
+                                <td>
+                                    <button onclick="approveRegistration(${reg.id})" style="background: green; color: white;">Approve</button>
+                                    <button onclick="rejectRegistration(${reg.id})" style="background: red; color: white;">Reject</button>
+                                </td>
+                            </tr>`;
+                        });
+                        html += '</table>';
+                        container.innerHTML = html;
+                    }
+                } else {
+                    container.innerHTML = '<div class="error">Error loading pending registrations: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('pendingRegistrations').innerHTML = '<div class="error">Network error: ' + error.message + '</div>';
+            }
+        }
+
+        // Load all registrations
+        async function loadAllRegistrations() {
+            try {
+                const response = await fetch('http://localhost:8081/api/inscriptions', {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                });
+
+                const registrations = await response.json();
+                const container = document.getElementById('allRegistrations');
+                
+                if (response.ok) {
+                    if (registrations.length === 0) {
+                        container.innerHTML = '<p>No registrations found.</p>';
+                    } else {
+                        let html = '<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr>';
+                        registrations.forEach(reg => {
+                            html += `<tr>
+                                <td>${reg.id}</td>
+                                <td>${reg.nom} ${reg.prenom}</td>
+                                <td>${reg.email}</td>
+                                <td>${reg.role}</td>
+                                <td>${reg.statut || 'APPROVED'}</td>
+                            </tr>`;
+                        });
+                        html += '</table>';
+                        container.innerHTML = html;
+                    }
+                } else {
+                    container.innerHTML = '<div class="error">Error loading registrations: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('allRegistrations').innerHTML = '<div class="error">Network error: ' + error.message + '</div>';
+            }
+        }
+
+        // Approve registration
+        async function approveRegistration(id) {
+            try {
+                const response = await fetch(`http://localhost:8081/api/inscriptions/${id}/accepter`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                });
+
+                if (response.ok) {
+                    alert('✅ Registration approved successfully!');
+                    loadPendingRegistrations();
+                } else {
+                    const error = await response.text();
+                    alert('❌ Failed to approve registration: ' + error);
+                }
+            } catch (error) {
+                alert('❌ Network error: ' + error.message);
+            }
+        }
+
+        // Reject registration
+        async function rejectRegistration(id) {
+            if (confirm('Are you sure you want to reject this registration? This will delete it permanently.')) {
+                try {
+                    const response = await fetch(`http://localhost:8081/api/inscriptions/${id}/refuser`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': 'Bearer ' + adminToken
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('✅ Registration rejected successfully!');
+                        loadPendingRegistrations();
+                    } else {
+                        const error = await response.text();
+                        alert('❌ Failed to reject registration: ' + error);
+                    }
+                } catch (error) {
+                    alert('❌ Network error: ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

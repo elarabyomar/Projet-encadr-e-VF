@@ -1,0 +1,27 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <h1>🎓 {{ title }}</h1>
+  </div>
+
+  <div class="nav-menu" *ngIf="authService.isAuthenticated()">
+    <div class="nav-links">
+      <a routerLink="/dashboard" class="nav-link" routerLinkActive="active">Tableau de Bord</a>
+      <a routerLink="/admin/registrations" class="nav-link" routerLinkActive="active" *ngIf="authService.isAdmin()">Gestion Inscriptions</a>
+      <a routerLink="/teacher-notes" class="nav-link" routerLinkActive="active" *ngIf="authService.isTeacher()">Mes Notes</a>
+    </div>
+    
+    <div class="user-info">
+      <span class="user-name" *ngIf="authService.getCurrentUser()">
+        👤 {{ authService.getCurrentUser()?.prenom }} {{ authService.getCurrentUser()?.nom }}
+        <span class="user-role">({{ authService.getCurrentUser()?.role }})</span>
+      </span>
+      <button (click)="logout()" class="nav-btn logout-btn">Déconnexion</button>
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
+
+<app-notification></app-notification>

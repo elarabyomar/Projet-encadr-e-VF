@@ -1,0 +1,112 @@
+<div class="inseapp-register-container">
+  <h2>Inscription InseApp</h2>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Nom</label>
+      <input formControlName="nom" type="text" placeholder="Nom" />
+      <div class="error-message" *ngIf="registerForm.get('nom')?.touched && registerForm.get('nom')?.invalid">
+        <span *ngIf="registerForm.get('nom')?.errors?.['required']">Le nom est requis</span>
+        <span *ngIf="registerForm.get('nom')?.errors?.['pattern']">Le nom doit contenir uniquement des lettres (2-50 caractères)</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Prénom</label>
+      <input formControlName="prenom" type="text" placeholder="Prénom" />
+      <div class="error-message" *ngIf="registerForm.get('prenom')?.touched && registerForm.get('prenom')?.invalid">
+        <span *ngIf="registerForm.get('prenom')?.errors?.['required']">Le prénom est requis</span>
+        <span *ngIf="registerForm.get('prenom')?.errors?.['pattern']">Le prénom doit contenir uniquement des lettres (2-50 caractères)</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input formControlName="email" type="email" placeholder="Email" />
+      <div class="error-message" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        <span *ngIf="registerForm.get('email')?.errors?.['required']">L'email est requis</span>
+        <span *ngIf="registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['pattern']">Format d'email invalide</span>
+      </div>
+    </div>    <div class="form-group">
+      <label>Mot de passe</label>
+      <input formControlName="motDePasse" type="password" placeholder="8+ chars, 1 maj, 1 min, 1 chiffre, 1 spécial" />
+      <div class="error-message" *ngIf="registerForm.get('motDePasse')?.touched && registerForm.get('motDePasse')?.invalid">
+        <span *ngIf="registerForm.get('motDePasse')?.errors?.['required']">Le mot de passe est requis</span>
+        <span *ngIf="registerForm.get('motDePasse')?.errors?.['pattern']">Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Numéro Carte Nationale</label>
+      <input formControlName="numeroCarteNationale" type="text" placeholder="Format: AB123456 (4-20 chars)" />
+      <div class="error-message" *ngIf="registerForm.get('numeroCarteNationale')?.touched && registerForm.get('numeroCarteNationale')?.invalid">
+        <span *ngIf="registerForm.get('numeroCarteNationale')?.errors?.['required']">Le numéro de carte nationale est requis</span>
+        <span *ngIf="registerForm.get('numeroCarteNationale')?.errors?.['pattern']">Format invalide. Exemple: AB123456 (4-20 caractères)</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input formControlName="telephone" type="text" placeholder="Format: +212612345678 ou 0612345678" />
+      <div class="error-message" *ngIf="registerForm.get('telephone')?.touched && registerForm.get('telephone')?.invalid">
+        <span *ngIf="registerForm.get('telephone')?.errors?.['required']">Le numéro de téléphone est requis</span>
+        <span *ngIf="registerForm.get('telephone')?.errors?.['pattern']">Format invalide. Exemple: +212612345678 ou 0612345678</span>
+      </div>
+    </div><div class="form-group">
+      <label>Date de naissance</label>
+      <input formControlName="dateNaissance" type="date" required />
+      <div class="error-message" *ngIf="registerForm.get('dateNaissance')?.touched && registerForm.get('dateNaissance')?.invalid">
+        <span *ngIf="registerForm.get('dateNaissance')?.errors?.['required']">La date de naissance est requise</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Genre</label>
+      <select formControlName="genre" required>
+        <option value="">-- Sélectionner --</option>
+        <option value="Homme">Homme</option>
+        <option value="Femme">Femme</option>
+      </select>
+      <div class="error-message" *ngIf="registerForm.get('genre')?.touched && registerForm.get('genre')?.invalid">
+        <span *ngIf="registerForm.get('genre')?.errors?.['required']">Le genre est requis</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Rôle</label>
+      <select formControlName="role">
+        <option value="ETUDIANT">Étudiant</option>
+        <option value="ENSEIGNANT">Enseignant</option>
+      </select>
+    </div>
+    <ng-container *ngIf="registerForm.get('role')?.value === 'ETUDIANT'">
+      <div class="form-group">
+        <label>Filière</label>
+        <select formControlName="filiere">
+          <option value="">-- Sélectionner --</option>
+          <option value="DSE">DSE</option>
+          <option value="DS">DS</option>
+          <option value="ESBD">ESBD</option>
+          <option value="AF">AF</option>
+          <option value="RO">RO</option>
+          <option value="SDE">SDE</option>
+        </select>
+        <div class="error-message" *ngIf="registerForm.get('filiere')?.touched && registerForm.get('filiere')?.invalid">
+          <span *ngIf="registerForm.get('filiere')?.errors?.['required']">La filière est requise pour les étudiants</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Année</label>
+        <select formControlName="annee">
+          <option value="">-- Sélectionner --</option>
+          <option value="1ere">1ère année</option>
+          <option value="2eme">2ème année</option>
+          <option value="3eme">3ème année</option>
+        </select>
+        <div class="error-message" *ngIf="registerForm.get('annee')?.touched && registerForm.get('annee')?.invalid">
+          <span *ngIf="registerForm.get('annee')?.errors?.['required']">L'année est requise pour les étudiants</span>
+        </div>
+      </div>
+    </ng-container>
+    <button type="submit" [disabled]="loading || registerForm.invalid">S'inscrire</button>
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="success" *ngIf="success">{{ success }}</div>
+    <div class="loading" *ngIf="loading">Envoi...</div>
+  </form>
+  <div class="login-link">
+    <a routerLink="/login">Déjà inscrit ? Se connecter</a>
+  </div>
+</div>
